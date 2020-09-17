@@ -1,11 +1,16 @@
-﻿using System;
+﻿using DogGo.Models;
+using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DogGo.Repositories
 {
-    interface IDogRepository
+    public interface IDogRepository
     {
+        List<Dog> GetAllDogs();
+        Dog GetDogById(int id);
+        void AddDog(Dog dog);
+        void UpdateDog(Dog dog);
+        void DeleteDog(int id);
+
     }
 }
