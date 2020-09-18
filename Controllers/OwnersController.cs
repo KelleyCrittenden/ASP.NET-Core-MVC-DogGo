@@ -17,8 +17,15 @@ namespace DogGo.Controllers
         private readonly IWalkerRepository _walkerRepo;
         private readonly INeighborhoodRepository _neighborhoodRepo;
 
+
+        //CONSTRUCTOR
         // ASP.NET will give us an instance of our Walker Repository. 
         //This is called "Dependency Injection"
+        //CONSTRUCTOR : Same name as class, no return, special method
+        //Runs when a new instance is created
+        //Just a class
+        //ASP.Net creates the new OwnersController for us, can't see it but it is happening
+        //
         public OwnersController(
             IOwnerRepository ownerRepository,
             IDogRepository dogRepository,
@@ -31,7 +38,7 @@ namespace DogGo.Controllers
             _neighborhoodRepo = neighborhoodRepository;
         }
 
-
+        //METHOD
         //Gets the owners from the Owner Table
         //Using the GetAllOwners method from the OwnerRepository
         //Converts it to a list
@@ -39,7 +46,6 @@ namespace DogGo.Controllers
         public IActionResult Index()
         {
             List<Owner> owners = _ownerRepo.GetAllOwners();
-
             return View(owners);
         }
 
@@ -62,6 +68,8 @@ namespace DogGo.Controllers
             return View(vm);
         }
 
+
+        //**********************************************************************//
         // GET REQUEST: OwnersRepository/Create
         //When the user clicks on the Create Button
         //Handing the user a blank form, a blank view for them to fill out

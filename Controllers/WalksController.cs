@@ -16,6 +16,8 @@ namespace DogGo.Controllers
         {
             _walkRepo = walkRepository;
         }
+
+
         // GET: WalksController
         //Gets the walks from the Walk Table
         //Using the GetAllWalks method from the WalkRepository
