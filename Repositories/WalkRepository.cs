@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 namespace DogGo.Repositories
 {
-    public class WalkerRepository : IWalkerRepository
+    public class WalkRepository : IWalkRepository
     {
         private readonly IConfiguration _config;
 
         // The constructor accepts an IConfiguration object as a parameter. This class comes from the ASP.NET framework and is useful for retrieving things out of the appsettings.json file like connection strings.
-        public WalkerRepository(IConfiguration config)
+        public WalkRepository(IConfiguration config)
         {
             _config = config;
         }
@@ -23,7 +23,7 @@ namespace DogGo.Repositories
             }
         }
 
-        public List<Walker> GetAllWalkers()
+        public List<Walk> GetAllWalks()
         {
             using (SqlConnection conn = Connection)
             {
@@ -31,34 +31,35 @@ namespace DogGo.Repositories
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, [Name], ImageUrl, NeighborhoodId
-                        FROM Walker
+                        SELECT Id, Date, Duration, WalkerId, DogId,
+                        FROM Walks
                     ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<Walker> walkers = new List<Walker>();
+                    List<Walk> walks = new List<Walk>();
                     while (reader.Read())
                     {
-                        Walker walker = new Walker
+                        Walk walk = new Walk
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                            ImageUrl = reader.GetString(reader.GetOrdinal("ImageUrl")),
-                            NeighborhoodId = reader.GetInt32(reader.GetOrdinal("NeighborhoodId"))
+                            Date = reader.GetDateTime(reader.GetOrdinal("Date")),
+                            Duration = reader.GetInt32(reader.GetOrdinal("Duration")),
+                            WalkerId = reader.GetInt32(reader.GetOrdinal("WalkerId")),
+                            DogId = reader.GetInt32(reader.GetOrdinal("DogId"))
                         };
 
-                        walkers.Add(walker);
+                        walks.Add(walk);
                     }
 
                     reader.Close();
 
-                    return walkers;
+                    return walks;
                 }
             }
         }
 
-        public Walker GetWalkerById(int id)
+        public Walk GetWalkById(int id)
         {
             using (SqlConnection conn = Connection)
             {
@@ -66,8 +67,8 @@ namespace DogGo.Repositories
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, [Name], ImageUrl, NeighborhoodId
-                        FROM Walker
+                        SELECT Id, [Date],Duration, WalkerId, DogId
+                        FROM Walks
                         WHERE Id = @id
                     ";
 
@@ -77,16 +78,17 @@ namespace DogGo.Repositories
 
                     if (reader.Read())
                     {
-                        Walker walker = new Walker
+                        Walk walk = new Walk
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                            ImageUrl = reader.GetString(reader.GetOrdinal("ImageUrl")),
-                            NeighborhoodId = reader.GetInt32(reader.GetOrdinal("NeighborhoodId"))
+                            Date = reader.GetDateTime(reader.GetOrdinal("Date")),
+                            Duration = reader.GetInt32(reader.GetOrdinal("Duration")),
+                            WalkerId = reader.GetInt32(reader.GetOrdinal("WalkerId")),
+                            DogId = reader.GetInt32(reader.GetOrdinal("DogId"))
                         };
 
                         reader.Close();
-                        return walker;
+                        return walk;
                     }
                     else
                     {
@@ -97,42 +99,44 @@ namespace DogGo.Repositories
             }
         }
 
-        //Getting List of Walkers by Neighborhood Id
-        public List<Walker> GetWalkersInNeighborhood(int neighborhoodId)
+        public List<Walk> GetWalksbyWalkerId(int walkerId)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
+                
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                                SELECT Id, [Name], ImageUrl, NeighborhoodId
-                                FROM Walker
-                                WHERE NeighborhoodId = @neighborhoodId
-            ";
+                            Select Id, Date, Duration, WalkerId, DogId
+                            From Walks
+                            Where WalkerId = @walkerId
+                            ";
 
-                    cmd.Parameters.AddWithValue("@neighborhoodId", neighborhoodId);
+                    cmd.Parameters.AddWithValue("@walkerId", walkerId);
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<Walker> walkers = new List<Walker>();
+                    List<Walk> walks = new List<Walk>();
 
                     while (reader.Read())
                     {
-                        Walker walker = new Walker
+                        Walk walk = new Walk()
+
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                            ImageUrl = reader.GetString(reader.GetOrdinal("ImageUrl")),
-                            NeighborhoodId = reader.GetInt32(reader.GetOrdinal("NeighborhoodId"))
+                            Date = reader.GetDateTime(reader.GetOrdinal("Date")),
+                            Duration = reader.GetInt32(reader.GetOrdinal("Duration")),
+                            WalkerId = reader.GetInt32(reader.GetOrdinal("WalkerId")),
+                            DogId = reader.GetInt32(reader.GetOrdinal("DogId"))
                         };
 
-                        walkers.Add(walker);
+                        walks.Add(walk);
                     }
-
                     reader.Close();
+                    return walks;
 
-                    return walkers;
+
                 }
             }
         }
