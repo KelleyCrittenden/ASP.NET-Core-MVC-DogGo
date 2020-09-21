@@ -6,6 +6,8 @@ using DogGo.Repositories;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DogGo.Controllers
 {
@@ -25,9 +27,15 @@ namespace DogGo.Controllers
         //Using the GetAllDogs method from the DogRepository
         //Converts it to a list
         //Passes it off to the View
-        public IActionResult Index()
+        //Added GetCurrentUser HELPER FUNCTION so the index only displays users dogs
+        //Added Authorize so that only the dogs that belong to the user are displayed 
+
+        [Authorize]
+        public ActionResult Index()
         {
-            List<Dog> dogs = _dogRepo.GetAllDogs();
+            int ownerId = GetCurrentUserId();
+
+            List<Dog> dogs = _dogRepo.GetDogsByOwnerId(ownerId);
 
             return View(dogs);
         }
@@ -55,17 +63,21 @@ namespace DogGo.Controllers
 
         // POST: DogsRepository/Create
         // POST: Dogs/Create
+        //Allowing a user to creat a dog with their ownerId only
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(Dog dog)
         {
             try
             {
+                // update the dogs OwnerId to the current user's Id 
+                dog.OwnerId = GetCurrentUserId();
+
                 _dogRepo.AddDog(dog);
 
                 return RedirectToAction("Index");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return View(dog);
             }
@@ -129,6 +141,18 @@ namespace DogGo.Controllers
             {
                 return View(dog);
             }
+        }
+
+
+        // Getting the Id of the current logged in user and only displaying dogs that belong to them
+        // HELPER FUNCTION -- getting the ID of the current user is something that will need to be done many   times
+        private int GetCurrentUserId()
+        {
+            // Getting access to one of the claims from controller(name identifier) that we created
+            // Access to the users Id
+            // Must parse bc saved as string in claims
+            string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(id);
         }
     }
 }

@@ -9,6 +9,8 @@ namespace DogGo.Repositories
         List<Owner> GetAllOwners();
         Owner GetOwnerById(int id);
 
+        Owner GetOwnerByEmail(string email);
+
         //List<Owner> GetOwnerByIdWithDogs();
 
         //Method void because we are just creating this method now, not returning anything

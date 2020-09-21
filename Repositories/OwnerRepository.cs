@@ -141,6 +141,7 @@ namespace DogGo.Repositories
             }
         }
 
+        //
         public Owner GetOwnerByEmail(string email)
         {
             using (SqlConnection conn = Connection)
@@ -149,6 +150,7 @@ namespace DogGo.Repositories
 
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+                    //WHERE clause using email of current user to display dogs specific to that user
                     cmd.CommandText = @"
                         SELECT Id, [Name], Email, Address, Phone, NeighborhoodId
                         FROM Owner
@@ -158,6 +160,8 @@ namespace DogGo.Repositories
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
+
+                    //if we found an owner, create it, if not return null
                     if (reader.Read())
                     {
                         Owner owner = new Owner()

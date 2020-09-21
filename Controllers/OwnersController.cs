@@ -5,6 +5,10 @@ using DogGo.Repositories;
 
 using Microsoft.AspNetCore.Mvc;
 using DogGo.Models.ViewModels;
+using System.Threading.Tasks;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 
 namespace DogGo.Controllers
 {
@@ -173,6 +177,53 @@ namespace DogGo.Controllers
             {
                 return View(owner);
             }
+        }
+        //*******************************************************************//
+
+        public ActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Login(LoginViewModel viewModel)
+        {
+            //looking up owners to see if email exist, otherwise return unathorized
+            Owner owner = _ownerRepo.GetOwnerByEmail(viewModel.Email);
+
+            if (owner == null)
+            {
+                //returns 401 to user if they are not found in the database
+                return Unauthorized();
+            }
+
+           // If we did find a user run this
+           // Claims are just properties of the user, things we want to remember
+           // User is claiming to be.... claiming to have this email
+           // Data we want to store about the user
+           // Will always some form of identifier(owner.Id)
+           // Expects claim to be in list
+
+            var claims = new List<Claim>
+            {
+                //storing everything as a string
+                new Claim(ClaimTypes.NameIdentifier, owner.Id.ToString()),
+                new Claim(ClaimTypes.Email, owner.Email),
+                new Claim(ClaimTypes.Role, "DogOwner"),
+            };
+
+            var claimsIdentity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Cookies keep track of users
+            // Will eventually be saved in the users browser
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
+            //returning Index of dogs that belong to user
+
+            return RedirectToAction("Index", "Dogs");
         }
     }
 }
