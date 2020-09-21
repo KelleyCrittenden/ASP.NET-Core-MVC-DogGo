@@ -1,87 +1,158 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DogGo.Models;
+using DogGo.Repositories;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DogGo.Controllers
 {
     public class DogsController : Controller
+
     {
-        // GET: DogsController
+
+        private readonly IDogRepository _dogRepo;
+
+        // ASP.NET will give us an instance of our Dog Repository. 
+        //This is called "Dependency Injection"
+        public DogsController(IDogRepository dogRepository)
+        {
+            _dogRepo = dogRepository;
+        }
+        //Gets the dogs from the Dog Table
+        //Using the GetAllDogs method from the DogRepository
+        //Converts it to a list
+        //Passes it off to the View
+        //Added GetCurrentUser HELPER FUNCTION so the index only displays users dogs
+        //Added Authorize so that only the dogs that belong to the user are displayed 
+
+        [Authorize]
         public ActionResult Index()
         {
-            return View();
+            int ownerId = GetCurrentUserId();
+
+            List<Dog> dogs = _dogRepo.GetDogsByOwnerId(ownerId);
+
+            return View(dogs);
         }
 
-        // GET: DogsController/Details/5
+        // GET: OwnersRepository/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            Dog dog = _dogRepo.GetDogById(id);
+
+            if (dog == null)
+            {
+                return NotFound();
+            }
+
+            return View(dog);
         }
 
-        // GET: DogsController/Create
+        // GET REQUEST: DogsRepository/Create
+        //When the user clicks on the Create Button
+        //Handing the user a blank form, a blank view for them to fill out
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: DogsController/Create
+        // POST: DogsRepository/Create
+        // POST: Dogs/Create
+        //Allowing a user to creat a dog with their ownerId only
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Dog dog)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                // update the dogs OwnerId to the current user's Id 
+                dog.OwnerId = GetCurrentUserId();
+
+                _dogRepo.AddDog(dog);
+
+                return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return View(dog);
             }
         }
 
-        // GET: DogsController/Edit/5
+        // GET: Dogs/Edit/5
+        //Populate Form presented to user
         public ActionResult Edit(int id)
         {
-            return View();
+            Dog dog = _dogRepo.GetDogById(id);
+
+            if (dog == null)
+            {
+                return NotFound();
+            }
+
+            return View(dog);
         }
 
-        // POST: DogsController/Edit/5
+        // POST: Dogs/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, Dog dog)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _dogRepo.UpdateDog(dog);
+
+                return RedirectToAction("Index");
             }
-            catch
+            catch (Exception)
             {
-                return View();
+                return View(dog);
             }
         }
-
-        // GET: DogsController/Delete/5
+        // GET REQUEST: OwnersRepository/Delete/5
+        //When the user clicks on the Delete Button
+        //Presenting User with populated form confirming they want to delete user
         public ActionResult Delete(int id)
         {
-            return View();
+            Dog dog = _dogRepo.GetDogById(id);
+
+            return View(dog);
         }
 
-        // POST: DogsController/Delete/5
+
+        // POST: Dog/Delete/5
+        //If User clicks the delete button it deletes
+        //If User clicks on back to list, it goes back to the Index View
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Dog dog)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _dogRepo.DeleteDog(id);
+
+                return RedirectToAction("Index");
             }
-            catch
+            catch (Exception )
             {
-                return View();
+                return View(dog);
             }
+        }
+
+
+        // Getting the Id of the current logged in user and only displaying dogs that belong to them
+        // HELPER FUNCTION -- getting the ID of the current user is something that will need to be done many   times
+        private int GetCurrentUserId()
+        {
+            // Getting access to one of the claims from controller(name identifier) that we created
+            // Access to the users Id
+            // Must parse bc saved as string in claims
+            string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(id);
         }
     }
 }

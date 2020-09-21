@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DogGo.Repositories;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -29,10 +30,21 @@ namespace DogGo
             services.AddTransient<IWalkerRepository, WalkerRepository>();
 
             services.AddTransient<IOwnerRepository, OwnerRepository>();
-       
+
+            services.AddTransient<IDogRepository, DogRepository>();
+
+            services.AddTransient<INeighborhoodRepository, NeighborhoodRepository>();
+
+            services.AddTransient<IWalkRepository, WalkRepository>();
+
+           //Letting ASP.NET core know that we plan on using cookies for authentication
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options => options.LoginPath = "/Owners/LogIn");
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        //This adds a call to UseAuthentication()
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -50,17 +62,15 @@ namespace DogGo
 
             app.UseRouting();
 
+            //Must be in this order
+            app.UseAuthentication();
             app.UseAuthorization();
 
-            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-                //making decisions about the URL
-                //localhost:5001/Walker/Details/2
-                //Controller/Action(method in controller)/Id
             });
         }
     }
