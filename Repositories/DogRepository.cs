@@ -95,8 +95,8 @@ namespace DogGo.Repositories
                             Breed = reader.GetString(reader.GetOrdinal("Breed")),
                             OwnerId = reader.GetInt32(reader.GetOrdinal("OwnerId")),
                         };
-                    // Check if optional columns are null
-                    if (reader.IsDBNull(reader.GetOrdinal("Notes")) == false)
+                        // Check if optional columns are null
+                        if (reader.IsDBNull(reader.GetOrdinal("Notes")) == false)
                         {
                             dog.Notes = reader.GetString(reader.GetOrdinal("Notes"));
                         }
@@ -105,7 +105,7 @@ namespace DogGo.Repositories
                             dog.ImageUrl = reader.GetString(reader.GetOrdinal("ImageUrl"));
                         }
 
-                         reader.Close();
+                        reader.Close();
                         return dog;
                     }
 
@@ -208,7 +208,7 @@ namespace DogGo.Repositories
                 }
             }
         }
-        
+
         //Getting a List of Dogs By an Owner Id
         public List<Dog> GetDogsByOwnerId(int ownerId)
         {
