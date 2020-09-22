@@ -77,7 +77,7 @@ namespace DogGo.Controllers
 
                 return RedirectToAction("Index");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return View(dog);
             }
@@ -85,11 +85,13 @@ namespace DogGo.Controllers
 
         // GET: Dogs/Edit/5
         //Populate Form presented to user
+        [Authorize]
         public ActionResult Edit(int id)
         {
             Dog dog = _dogRepo.GetDogById(id);
+            int ownerId = GetCurrentUserId();
 
-            if (dog == null)
+            if (dog == null || dog.OwnerId != ownerId)
             {
                 return NotFound();
             }
@@ -97,13 +99,18 @@ namespace DogGo.Controllers
             return View(dog);
         }
 
-        // POST: Dogs/Edit/5
+        // POST: DogsRepository/Edit
+        // POST: Dogs/Edit
+        //Allowing a user to edit a dog with their ownerId only
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, Dog dog)
+        public ActionResult Edit(Dog dog)
         {
             try
             {
+                // update the dogs OwnerId to the current user's Id 
+                dog.OwnerId = GetCurrentUserId();
+
                 _dogRepo.UpdateDog(dog);
 
                 return RedirectToAction("Index");
@@ -113,16 +120,26 @@ namespace DogGo.Controllers
                 return View(dog);
             }
         }
+
+
+        //******************************************************************************//
         // GET REQUEST: OwnersRepository/Delete/5
         //When the user clicks on the Delete Button
         //Presenting User with populated form confirming they want to delete user
+
+        [Authorize]
         public ActionResult Delete(int id)
         {
+            int ownerId = GetCurrentUserId();
+
             Dog dog = _dogRepo.GetDogById(id);
+            if(dog.OwnerId != ownerId)
+            {
+                return NotFound();
+            }
 
             return View(dog);
         }
-
 
         // POST: Dog/Delete/5
         //If User clicks the delete button it deletes
@@ -133,11 +150,14 @@ namespace DogGo.Controllers
         {
             try
             {
+                // update the dogs OwnerId to the current user's Id 
+                dog.OwnerId = GetCurrentUserId();
+
                 _dogRepo.DeleteDog(id);
 
                 return RedirectToAction("Index");
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return View(dog);
             }
