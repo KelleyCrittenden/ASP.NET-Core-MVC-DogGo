@@ -99,12 +99,13 @@ namespace DogGo.Repositories
             }
         }
 
+
         public List<Walk> GetWalksbyWalkerId(int walkerId)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
-                
+
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
@@ -136,10 +137,10 @@ namespace DogGo.Repositories
                             DogId = reader.GetInt32(reader.GetOrdinal("DogId")),
                             Owner = owner
                         };
-                
-                     
 
-                       
+
+
+
 
                         walks.Add(walk);
                     }
@@ -150,5 +151,57 @@ namespace DogGo.Repositories
                 }
             }
         }
+
+            public List<Walk> GetWalksbyDogId(int walkerId)
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                                Select Walks.Id, Date, Duration, WalkerId, DogId, Owner.Name AS ownerName
+                                From Walks
+                                LEFT JOIN Dog ON Walks.DogId = Dog.Id
+                                LEFT JOIN Owner ON Dog.OwnerId = Owner.Id
+                                Where WalkerId = @walkerId
+                            ";
+
+                        cmd.Parameters.AddWithValue("@walkerId", walkerId);
+
+                        SqlDataReader reader = cmd.ExecuteReader();
+
+                        List<Walk> walks = new List<Walk>();
+
+                        while (reader.Read())
+                        {
+                            Owner owner = new Owner
+                            {
+                                Name = reader.GetString(reader.GetOrdinal("ownerName")),
+                            };
+                            Walk walk = new Walk()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Date = reader.GetDateTime(reader.GetOrdinal("Date")),
+                                Duration = reader.GetInt32(reader.GetOrdinal("Duration")),
+                                WalkerId = reader.GetInt32(reader.GetOrdinal("WalkerId")),
+                                DogId = reader.GetInt32(reader.GetOrdinal("DogId")),
+                                Owner = owner
+                            };
+
+
+
+
+
+                            walks.Add(walk);
+                        }
+                        reader.Close();
+                        return walks;
+
+
+                    }
+                }
+            }
     }
 }
