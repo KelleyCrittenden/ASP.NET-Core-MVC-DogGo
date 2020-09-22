@@ -10,5 +10,7 @@ namespace DogGo.Repositories
         Walker GetWalkerById(int id);
         List<Walker> GetWalkersInNeighborhood(int id);
 
+
+
     }
 }

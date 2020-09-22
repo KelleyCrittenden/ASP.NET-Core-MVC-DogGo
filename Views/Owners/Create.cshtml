@@ -12,11 +12,12 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input asp-for="Id" type="hidden" class="form-control" />
             <div class="form-group">
-                    @*This text box is FOR the owner email property*@
+                @*This text box is FOR the owner email property*@
                 <label asp-for="Owner.Email" class="control-label"></label>
                 <input asp-for="Owner.Email" class="form-control" />
-                    @* Place to put error message incase input isn't correct *@
+                @* Place to put error message incase input isn't correct *@
                 <span asp-validation-for="Owner.Email" class="text-danger"></span>
             </div>
             <div class="form-group">

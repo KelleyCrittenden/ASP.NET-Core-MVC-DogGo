@@ -82,11 +82,6 @@ namespace DogGo.Repositories
                         FROM Dog
                         WHERE Id = @id";
 
-                    //@"SELECT Dog.Id, Dog.Name, Dog.Breed, Owner.Name
-                            //FROM Dog
-                            //LEFT JOIN Owner ON Dog.OwnerId = Owner.Id
-                            //WHERE Dog.Id =  @id";
-
                     cmd.Parameters.AddWithValue("@id", id);
 
                     SqlDataReader reader = cmd.ExecuteReader();
